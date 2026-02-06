@@ -71,7 +71,7 @@ int main(int argc, char** argv)
                 MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
                     projectRootPathAbsolute);
 
-            std::string_view projectRootPathAbsoluteString = projectRootPathAbsoluteCharBuffer.GetStringView();
+            std::string_view projectRootPathAbsoluteString = projectRootPathAbsoluteCharBuffer.ToStringView();
 
             switch (result)
             {
