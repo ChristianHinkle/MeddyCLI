@@ -14,7 +14,7 @@ SET(MY_BASE_PROJECT_NAME_LEAFNAME "MeddyCLI")
 project(${MY_BASE_PROJECT_NAME_FULL}
   VERSION 0.1.0
   DESCRIPTION ""
-  HOMEPAGE_URL "https://github.com/ChristianHinko/MeddyCLI"
+  HOMEPAGE_URL "https://github.com/ChristianHinkle/MeddyCLI"
   LANGUAGES CXX
   )
 
