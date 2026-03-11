@@ -14,84 +14,84 @@
     ],
     "testPresets": [
         {
-            "name": "meddysdkcli-base",
+            "name": "meddycli-base",
             "hidden": true,
             "filter": {
                 "include": {
-                    "name": "MeddySDKCLI."
+                    "name": "MeddyCLI."
                 }
             }
         },
         {
-            "name": "meddysdkcli-win-debug",
-            "displayName": "MeddySDKCLI - Windows Debug",
+            "name": "meddycli-win-debug",
+            "displayName": "MeddyCLI - Windows Debug",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "win-debug"
             ]
         },
         {
-            "name": "meddysdkcli-win-release",
-            "displayName": "MeddySDKCLI - Windows Release",
+            "name": "meddycli-win-release",
+            "displayName": "MeddyCLI - Windows Release",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "win-release"
             ]
         },
         {
-            "name": "meddysdkcli-linux-debug",
-            "displayName": "MeddySDKCLI - Linux Debug",
+            "name": "meddycli-linux-debug",
+            "displayName": "MeddyCLI - Linux Debug",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "linux-debug"
             ]
         },
         {
-            "name": "meddysdkcli-linux-release",
-            "displayName": "MeddySDKCLI - Linux Release",
+            "name": "meddycli-linux-release",
+            "displayName": "MeddyCLI - Linux Release",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "linux-release"
             ]
         },
         {
-            "name": "meddysdkcli-macos-debug",
-            "displayName": "MeddySDKCLI - macOS Debug",
+            "name": "meddycli-macos-debug",
+            "displayName": "MeddyCLI - macOS Debug",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "macos-debug"
             ]
         },
         {
-            "name": "meddysdkcli-macos-release",
-            "displayName": "MeddySDKCLI - macOS Release",
+            "name": "meddycli-macos-release",
+            "displayName": "MeddyCLI - macOS Release",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "macos-release"
             ]
         }
     ],
     "packagePresets": [
         {
-            "name": "meddysdkcli-base",
+            "name": "meddycli-base",
             "hidden": true,
-            "configFile": "MeddySDKCLI/CPackConfig.cmake",
-            "packageDirectory": "MeddySDKCLI/Packages"
+            "configFile": "MeddyCLI/CPackConfig.cmake",
+            "packageDirectory": "MeddyCLI/Packages"
         },
         {
-            "name": "meddysdkcli-win-debug-nsis",
-            "displayName": "MeddySDKCLI - Windows Debug - NSIS",
+            "name": "meddycli-win-debug-nsis",
+            "displayName": "MeddyCLI - Windows Debug - NSIS",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "nsis-base"
             ],
             "configurePreset": "win-debug-default"
         },
         {
-            "name": "meddysdkcli-win-release-nsis",
-            "displayName": "MeddySDKCLI - Windows Release - NSIS",
+            "name": "meddycli-win-release-nsis",
+            "displayName": "MeddyCLI - Windows Release - NSIS",
             "inherits": [
-                "meddysdkcli-base",
+                "meddycli-base",
                 "nsis-base"
             ],
             "configurePreset": "win-release-default"

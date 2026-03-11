@@ -1,4 +1,4 @@
-# MeddySDKCLI
+# MeddyCLI
 
 A command-line interface application for Meddy.
 
@@ -7,17 +7,17 @@ For a superproject with all components Meddy has to offer, see [MeddySDK](https:
 
 ## Dependencies
 
-MeddySDKCLI
+MeddyCLI
 - [MeddySDK_Meddyproject](https://github.com/ChristianHinkle/MeddySDK_Meddyproject)
 - [CppUtils_Misc](https://github.com/ChristianHinkle/CppUtils_Misc)
 
 ## Project Structure 📂
 
-Does it install: Yes, it's installed as the `MeddySDKCLI` package and export.
+Does it install: Yes, it's installed as the `MeddyCLI` package and export.
 
 ### Source/
 
-Provides the target: `MeddySDKCLI::Source` (interface library).
+Provides the target: `MeddyCLI::Source` (interface library).
 
 Does it install: Yes, it's installed as the `Source` component.
 
@@ -25,7 +25,7 @@ What it is: Holds all the private source files to compile.
 
 ### Executable/
 
-Provides the target: `MeddySDKCLI::Executable` (executable).
+Provides the target: `MeddyCLI::Executable` (executable).
 
 Does it install: Yes, it's installed as the `Executable` component.
 
@@ -79,9 +79,9 @@ See "Build Instructions" above.
 
 ### 2. Invoke CPack
 
-Command line: `cpack --preset="meddysdkcli-win-debug-nsis"`.
+Command line: `cpack --preset="meddycli-win-debug-nsis"`.
 
-IDE: Choose the `meddysdkcli-win-debug-nsis` package preset, and "package" it.
+IDE: Choose the `meddycli-win-debug-nsis` package preset, and "package" it.
 
 ## Test Instructions 🧪
 
@@ -93,6 +93,6 @@ See "Build Instructions" above.
 
 ### 2. Invoke CTest
 
-Command line: `ctest --preset="meddysdkcli-win-debug"`.
+Command line: `ctest --preset="meddycli-win-debug"`.
 
-IDE: Choose the `meddysdkcli-win-debug` test preset, and "run tests".
+IDE: Choose the `meddycli-win-debug` test preset, and "run tests".

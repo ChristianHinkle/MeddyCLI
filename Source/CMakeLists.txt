@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 4.0)
 # Write out the main project name here, in one place, to make renaming easier. This is mainly used by our
 # boilerplate code. There may be other mentions of the project's name mixed in certain places of this file, so
 # don't rely on these variables alone for renaming.
-SET(MY_BASE_PROJECT_NAME_FULL "MeddySDKCLI")
+SET(MY_BASE_PROJECT_NAME_FULL "MeddyCLI")
 string(TOLOWER ${MY_BASE_PROJECT_NAME_FULL} MY_BASE_PROJECT_NAME_FULL_LOWERCASE)
 string(TOUPPER ${MY_BASE_PROJECT_NAME_FULL} MY_BASE_PROJECT_NAME_FULL_UPPERCASE)
 SET(MY_BASE_PROJECT_NAME_NAMESPACE "")
-SET(MY_BASE_PROJECT_NAME_LEAFNAME "MeddySDKCLI")
+SET(MY_BASE_PROJECT_NAME_LEAFNAME "MeddyCLI")
 
 project(${MY_BASE_PROJECT_NAME_FULL}_Source
   VERSION 0.1.0
@@ -32,7 +32,7 @@ add_library(${MY_BASE_PROJECT_NAME_FULL}_Source INTERFACE)
 # Set output names of our targets.
 #
 # This determines the name of the binary files generated for the target. The name may differ from the actual
-# target name. E.g., for MeddySDKCLI, we name its executable file "meddy" to suit our desired command line usage.
+# target name. E.g., for MeddyCLI, we name its executable file "meddy" to suit our desired command line usage.
 #
 
 set_target_properties(${MY_BASE_PROJECT_NAME_FULL}_Source

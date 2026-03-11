@@ -5,11 +5,11 @@ cmake_minimum_required(VERSION 4.0)
 # Write out the main project name here, in one place, to make renaming easier. This is mainly used by our
 # boilerplate code. There may be other mentions of the project's name mixed in certain places of this file, so
 # don't rely on these variables alone for renaming.
-SET(MY_BASE_PROJECT_NAME_FULL "MeddySDKCLI")
+SET(MY_BASE_PROJECT_NAME_FULL "MeddyCLI")
 string(TOLOWER ${MY_BASE_PROJECT_NAME_FULL} MY_BASE_PROJECT_NAME_FULL_LOWERCASE)
 string(TOUPPER ${MY_BASE_PROJECT_NAME_FULL} MY_BASE_PROJECT_NAME_FULL_UPPERCASE)
 SET(MY_BASE_PROJECT_NAME_NAMESPACE "")
-SET(MY_BASE_PROJECT_NAME_LEAFNAME "MeddySDKCLI")
+SET(MY_BASE_PROJECT_NAME_LEAFNAME "MeddyCLI")
 
 project(${MY_BASE_PROJECT_NAME_FULL}_Tests
   VERSION 0.1.0
@@ -23,7 +23,7 @@ project(${MY_BASE_PROJECT_NAME_FULL}_Tests
 # configuration process.
 
 add_test(
-  NAME MeddySDKCLI.Project.New.SuccessCase
+  NAME MeddyCLI.Project.New.SuccessCase
   COMMAND ${CMAKE_COMMAND}
     -D"CMAKE_MODULE_PATH"=${CMAKE_MODULE_PATH}
     -D"MY_MEDDY_EXECUTABLE_PATH"='$<TARGET_FILE:${MY_BASE_PROJECT_NAME_NAMESPACE}::${MY_BASE_PROJECT_NAME_LEAFNAME}::Executable>'
