@@ -125,7 +125,7 @@ int main(int argc, char** argv)
         {
             boost::filesystem::path currentWorkingDir = currentWorkingDirectoryString;
 
-            MeddySDK::ExpectedResult result = MeddySDK::GetOuterDotMeddyprojectPath(std::move(currentWorkingDir));
+            MeddySDK::ExpectedResult result = MeddySDK::GetOuterMeddyproject(std::move(currentWorkingDir));
             if (result.IsError())
             {
                 switch (result.GetError())
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
             }
 
             CppUtils::CharBufferString<char, 2048> resultPathString =
-                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(std::move(result).GetValue());
+                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(std::move(result).GetValue().GetDotMeddyprojectPath());
 
             std::cout << resultPathString.ToStringView() << '\n';
             std::cout << '\n';
