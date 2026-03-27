@@ -28,6 +28,8 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    const std::string_view currentWorkingDirectoryString = argv[0];
+
     const std::string_view arg1st = argv[1];
 
     if (arg1st == "project")
@@ -113,6 +115,38 @@ int main(int argc, char** argv)
             }
 
             std::cout << "Successfully created project files. " << projectRootPathAbsolute.filename() << " is now a meddyproject." << '\n';
+            std::cout << '\n';
+            std::cout.flush();
+
+            return 0;
+        }
+
+        if (arg2nd == "current")
+        {
+            boost::filesystem::path currentWorkingDir = currentWorkingDirectoryString;
+
+            MeddySDK::ExpectedResult result = MeddySDK::GetOuterDotMeddyprojectPath(std::move(currentWorkingDir));
+            if (result.IsError())
+            {
+                switch (result.GetError())
+                {
+                case MeddySDK::Error_GetOuterDotMeddyprojectPath::NoDotMeddyprojectFound:
+                    std::cout << "No current meddyproject found." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                }
+
+                std::cout << "error: Something went wrong." << '\n';
+                std::cout << '\n';
+                std::cout.flush();
+                return 0;
+            }
+
+            CppUtils::CharBufferString<char, 2048> resultPathString =
+                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(std::move(result).GetValue());
+
+            std::cout << resultPathString.ToStringView() << '\n';
             std::cout << '\n';
             std::cout.flush();
 
