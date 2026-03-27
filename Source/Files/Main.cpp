@@ -125,7 +125,7 @@ int main(int argc, char** argv)
         {
             boost::filesystem::path currentWorkingDir = currentWorkingDirectoryString;
 
-            MeddySDK::ExpectedResult result = MeddySDK::GetOuterMeddyproject(std::move(currentWorkingDir));
+            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(std::move(currentWorkingDir));
             if (result.IsError())
             {
                 switch (result.GetError())
