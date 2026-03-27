@@ -1,9 +1,9 @@
-[submodule "GeneralCMakePresets"]
-	path = GeneralCMakePresets
-	url = https://github.com/ChristianHinkle/GeneralCMakePresets
-[submodule "GeneralCMakeModules"]
-	path = GeneralCMakeModules
-	url = https://github.com/ChristianHinkle/GeneralCMakeModules
 [submodule "CMakeProjectFramework"]
 	path = CMakeProjectFramework
 	url = https://github.com/ChristianHinkle/CMakeProjectFramework.git
+[submodule "CMakePresets_General"]
+	path = CMakePresets_General
+	url = https://github.com/ChristianHinkle/CMakePresets_General.git
+[submodule "CMakeUtils_Misc"]
+	path = CMakeUtils_Misc
+	url = https://github.com/ChristianHinkle/CMakeUtils_Misc.git
