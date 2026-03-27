@@ -4,4 +4,4 @@ cmake_minimum_required(VERSION 4.0)
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/../CMakeProjectFramework/CMakeProjectFramework.cmake)
 
-cmakeprojectframework_cmakelists_sourceproject("MeddyCLI" "" "MeddyCLI")
+cmakeprojectframework_cmakelists_includeproject("MeddyCLI" "" "MeddyCLI")

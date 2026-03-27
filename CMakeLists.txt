@@ -33,6 +33,10 @@ include(CMakePackageConfigHelpers)
 
 # Declare subprojects.
 
+FetchContent_Declare(${MY_BASE_PROJECT_NAME_FULL}_Include
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Include"
+  )
+
 FetchContent_Declare(${MY_BASE_PROJECT_NAME_FULL}_Source
   SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Source"
   )
@@ -48,6 +52,8 @@ if(BUILD_TESTING)
 endif()
 
 # Add subprojects.
+
+FetchContent_MakeAvailable(${MY_BASE_PROJECT_NAME_FULL}_Include)
 
 FetchContent_MakeAvailable(${MY_BASE_PROJECT_NAME_FULL}_Source)
 
