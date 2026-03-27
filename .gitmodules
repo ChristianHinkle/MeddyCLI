@@ -4,3 +4,6 @@
 [submodule "GeneralCMakeModules"]
 	path = GeneralCMakeModules
 	url = https://github.com/ChristianHinkle/GeneralCMakeModules
+[submodule "CMakeProjectFramework"]
+	path = CMakeProjectFramework
+	url = https://github.com/ChristianHinkle/CMakeProjectFramework.git
