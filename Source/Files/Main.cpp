@@ -108,7 +108,7 @@ int main(int argc, char** argv)
                 std::cout.flush();
                 return 0;
             case MeddySDK::UncertainProjectCreationResult::Failed_FilesystemFailedToCreateManifestFile:
-                std::cout << "error: Filesystem failed to create the \"" MEDDYSDK_MANIFEST_FILENAME_STRING_LITERAL "\"." << '\n';
+                std::cout << "error: Filesystem failed to create the \"" MEDDYSDK_MEDDYPROJECT_MANIFEST_FILENAME_STRING_LITERAL "\"." << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
