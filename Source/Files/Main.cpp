@@ -6,6 +6,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <MeddySDK/Meddyproject/Utils.h>
 #include <MeddySDK/Meddyproject/FilesystemUtils.h>
+#include <MeddySDK/Meddydata/Utils.h>
 #include <utility>
 
 namespace
@@ -14,8 +15,10 @@ namespace
     void DumpHelpStdOutput();
 }
 
-// TODO @Christian: Dispatch commands in some kind of pipeline system, rather than using
+// @Christian: TODO: Dispatch commands in some kind of pipeline system, rather than using
 // many hard-coded if statements in this main function.
+// @Christian: TODO: Support both case of the executable path being passed as `argv[0]` as well as it
+// not being passed at all.
 int main(int argc, char** argv)
 {
     std::cout << '\n';
@@ -28,7 +31,15 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const std::string_view currentWorkingDirectoryString = argv[0];
+    const boost::filesystem::path currentWorkingDirectoryAbsolute = boost::filesystem::current_path();
+    assert(currentWorkingDirectoryAbsolute.is_absolute()); // The `current_path` function returns the path as an absolute.
+
+    const CppUtils::CharBufferString<char, 2048> currentWorkingDirAbsoluteCharBuffer =
+        MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+            boost::filesystem::weakly_canonical(currentWorkingDirectoryAbsolute)
+        );
+
+    const std::string_view currentWorkingDirectoryString = currentWorkingDirAbsoluteCharBuffer.ToStringView();
 
     const std::string_view arg1st = argv[1];
 
@@ -40,6 +51,7 @@ int main(int argc, char** argv)
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
             std::cout << "  meddy project new <project-root-dir>" << '\n';
+            std::cout << "  meddy project current" << '\n';
             std::cout << '\n';
             std::cout.flush();
             return 0;
@@ -54,6 +66,7 @@ int main(int argc, char** argv)
                 std::cout << '\n';
                 std::cout << "Possible commands" << '\n';
                 std::cout << "  meddy project new <project-root-dir>" << '\n';
+                std::cout << "  meddy project current" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
@@ -67,11 +80,12 @@ int main(int argc, char** argv)
             MeddySDK::UncertainProjectCreationResult result =
                 MeddySDK::TryCreateNewProject(std::move(projectRootPath));
 
-            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path(arg3rd));
+            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, currentWorkingDirectoryAbsolute);
 
             CppUtils::CharBufferString<char, 2048> projectRootPathAbsoluteCharBuffer =
                 MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
-                    projectRootPathAbsolute);
+                    projectRootPathAbsolute
+                );
 
             std::string_view projectRootPathAbsoluteString = projectRootPathAbsoluteCharBuffer.ToStringView();
 
@@ -123,13 +137,16 @@ int main(int argc, char** argv)
 
         if (arg2nd == "current")
         {
-            boost::filesystem::path currentWorkingDir = currentWorkingDirectoryString;
-
-            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(std::move(currentWorkingDir));
+            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{currentWorkingDirectoryAbsolute});
             if (result.IsError())
             {
                 switch (result.GetError())
                 {
+                case MeddySDK::Error_GetOuterDotMeddyprojectPath::PathDoesntExist:
+                    std::cout << "error: \"" << currentWorkingDirectoryString << "\" does not exist." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
                 case MeddySDK::Error_GetOuterDotMeddyprojectPath::NoDotMeddyprojectFound:
                     std::cout << "No current meddyproject found." << '\n';
                     std::cout << '\n';
@@ -137,14 +154,16 @@ int main(int argc, char** argv)
                     return 0;
                 }
 
-                std::cout << "error: Something went wrong." << '\n';
+                std::cout << "error: Command failed for an unknown reason." << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
             }
 
             CppUtils::CharBufferString<char, 2048> resultPathString =
-                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(std::move(result).GetValue().GetDotMeddyprojectPath());
+                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+                    boost::filesystem::weakly_canonical(std::move(result).GetValue().GetDotMeddyprojectPath())
+                );
 
             std::cout << resultPathString.ToStringView() << '\n';
             std::cout << '\n';
@@ -157,6 +176,105 @@ int main(int argc, char** argv)
         std::cout << '\n';
         std::cout << "Possible commands" << '\n';
         std::cout << "  meddy project new <project-root-dir>" << '\n';
+        std::cout << "  meddy project current" << '\n';
+        std::cout << '\n';
+        std::cout.flush();
+        return 0;
+    }
+
+    if (arg1st == "meddydata")
+    {
+        if (argc <= 2)
+        {
+            std::cout << "meddy: '" << arg1st << "' requires arguments." << '\n';
+            std::cout << '\n';
+            std::cout << "Possible commands" << '\n';
+            std::cout << "  meddy meddydata create <source-pathname>" << '\n';
+            std::cout << '\n';
+            std::cout.flush();
+            return 0;
+        }
+
+        const std::string_view arg2nd = argv[2];
+        if (arg2nd == "create")
+        {
+            if (argc <= 3)
+            {
+                std::cout << "meddy: '" << arg1st << " " << arg2nd << "' requires arguments." << '\n';
+                std::cout << '\n';
+                std::cout << "Possible commands" << '\n';
+                std::cout << "  meddy meddydata create <source-pathname>" << '\n';
+                std::cout << '\n';
+                std::cout.flush();
+                return 0;
+            }
+
+            // TODO: Error when extra args are given.
+
+            const std::string_view arg3rd = argv[3];
+            boost::filesystem::path sourcePath = arg3rd;
+
+            boost::filesystem::path sourcePathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, currentWorkingDirectoryAbsolute);
+
+            CppUtils::ExpectedResult result =
+                MeddySDK::TryAddMeddydata(boost::filesystem::path{sourcePathAbsolute});
+
+            CppUtils::CharBufferString<char, 2048> sourcePathAbsoluteCharBuffer =
+                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+                    sourcePathAbsolute
+                );
+
+            std::string_view sourcePathAbsoluteString = sourcePathAbsoluteCharBuffer.ToStringView();
+
+            if (result.IsError())
+            {
+                switch (result.GetError())
+                {
+                case MeddySDK::Error_TryAddMeddydata::SourcePathDoesNotExist:
+                    std::cout << "error: \"" << sourcePathAbsoluteString << "\" does not exist." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                case MeddySDK::Error_TryAddMeddydata::CouldntLocateOuterMeddyproject:
+                    std::cout << "error: \"" << sourcePathAbsoluteString << "\" is not located in a meddyproject." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                case MeddySDK::Error_TryAddMeddydata::FilesystemFailedToCreateMeddydata:
+                    std::cout << "error: Filesystem failed to create the corresponding meddydata directory." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                case MeddySDK::Error_TryAddMeddydata::FilesystemFailedToCreateManifestFile:
+                    std::cout << "error: Filesystem failed to create the \"" MEDDYSDK_MEDDYDATA_MANIFEST_FILENAME_STRING_LITERAL "\"." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                }
+
+                // Hits if there is an error returned that we don't have a case for in here.
+                std::cout << "error: Command failed for an unknown reason." << '\n';
+                std::cout << '\n';
+                std::cout.flush();
+                return 0;
+            }
+
+            CppUtils::CharBufferString<char, 2048> resultMeddydataPathString =
+                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+                    boost::filesystem::weakly_canonical(result.GetValue().GetMeddydataPath())
+                );
+
+            std::cout << "Successfully created meddydata at: " << resultMeddydataPathString.ToStringView() << '\n';
+            std::cout << '\n';
+            std::cout.flush();
+
+            return 0;
+        }
+
+        std::cout << "meddy: '" << arg2nd << "' is not a " << arg1st << " command." << '\n';
+        std::cout << '\n';
+        std::cout << "Possible commands" << '\n';
+        std::cout << "  meddy meddydata create <source-pathname>" << '\n';
         std::cout << '\n';
         std::cout.flush();
         return 0;
@@ -197,6 +315,9 @@ namespace
         std::cout << '\n';
         std::cout << "Create a project" << '\n';
         std::cout << "  meddy project new <project-root-dir>" << '\n';
+        std::cout << '\n';
+        std::cout << "Create meddydata" << '\n';
+        std::cout << "  meddy meddydata create <source-pathname>" << '\n';
 
         if constexpr (shouldFlush)
         {

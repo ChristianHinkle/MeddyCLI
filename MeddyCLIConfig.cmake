@@ -11,8 +11,8 @@ SET(MY_BASE_PROJECT_NAME_LEAFNAME "MeddyCLI")
 
 include(CMakeFindDependencyMacro)
 
-# Get the Meddyproject export.
 find_dependency(MeddySDK_Meddyproject CONFIG COMPONENTS Static)
+find_dependency(MeddySDK_Meddydata CONFIG COMPONENTS Static)
 
 find_dependency(Boost CONFIG COMPONENTS filesystem)
 

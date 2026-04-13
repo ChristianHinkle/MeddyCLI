@@ -1,6 +1,7 @@
 # Copyright (c) 2023-2025 Christian Hinkle, Brian Hinkle.
 
 find_package(MeddySDK_Meddyproject 0 CONFIG REQUIRED COMPONENTS Static)
+find_package(MeddySDK_Meddydata 0 CONFIG REQUIRED COMPONENTS Static)
 
 find_package(Boost 0 CONFIG REQUIRED COMPONENTS filesystem)
 
