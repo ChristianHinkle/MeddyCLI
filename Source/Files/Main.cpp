@@ -106,18 +106,18 @@ int main(int argc, char** argv)
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
-            case MeddySDK::UncertainProjectCreationResult::Failed_DotMeddyprojectAlreadyExists:
-                std::cout << "error: \"" << projectRootPathAbsoluteString << "\" has an existing directory named \"" MEDDYSDK_DOT_MEDDYPROJECT_STRING_LITERAL "\" which is preventing this operation." << '\n';
+            case MeddySDK::UncertainProjectCreationResult::Failed_MeddyprojectDirAlreadyExists:
+                std::cout << "error: \"" << projectRootPathAbsoluteString << "\" has an existing directory named \"" MEDDYSDK_MEDDYPROJECT_DIR_STRING_LITERAL "\" which is preventing this operation." << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
-            case MeddySDK::UncertainProjectCreationResult::Failed_DotMeddyprojectAlreadyExistsAndIsNonDirectory:
-                std::cout << "error: \"" << projectRootPathAbsoluteString << "\" has an existing file named \"" MEDDYSDK_DOT_MEDDYPROJECT_STRING_LITERAL "\" which is preventing this operation." << '\n';
+            case MeddySDK::UncertainProjectCreationResult::Failed_MeddyprojectDirAlreadyExistsAndIsNonDirectory:
+                std::cout << "error: \"" << projectRootPathAbsoluteString << "\" has an existing file named \"" MEDDYSDK_MEDDYPROJECT_DIR_STRING_LITERAL "\" which is preventing this operation." << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
-            case MeddySDK::UncertainProjectCreationResult::Failed_FilesystemFailedToCreateDotMeddyproject:
-                std::cout << "error: Filesystem failed to create the \"" MEDDYSDK_DOT_MEDDYPROJECT_STRING_LITERAL "\"." << '\n';
+            case MeddySDK::UncertainProjectCreationResult::Failed_FilesystemFailedToCreateMeddyprojectDir:
+                std::cout << "error: Filesystem failed to create the \"" MEDDYSDK_MEDDYPROJECT_DIR_STRING_LITERAL "\"." << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
@@ -142,12 +142,12 @@ int main(int argc, char** argv)
             {
                 switch (result.GetError())
                 {
-                case MeddySDK::Error_GetOuterDotMeddyprojectPath::PathDoesntExist:
+                case MeddySDK::Error_GetOuterMeddyprojectDirPath::PathDoesntExist:
                     std::cout << "error: \"" << currentWorkingDirectoryString << "\" does not exist." << '\n';
                     std::cout << '\n';
                     std::cout.flush();
                     return 0;
-                case MeddySDK::Error_GetOuterDotMeddyprojectPath::NoDotMeddyprojectFound:
+                case MeddySDK::Error_GetOuterMeddyprojectDirPath::NoMeddyprojectDirFound:
                     std::cout << "No current meddyproject found." << '\n';
                     std::cout << '\n';
                     std::cout.flush();
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
 
             CppUtils::CharBufferString<char, 2048> resultPathString =
                 MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
-                    boost::filesystem::weakly_canonical(std::move(result).GetValue().GetDotMeddyprojectPath())
+                    boost::filesystem::weakly_canonical(std::move(result).GetValue().GetMeddyprojectDirPath())
                 );
 
             std::cout << resultPathString.ToStringView() << '\n';

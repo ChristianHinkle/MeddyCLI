@@ -45,12 +45,12 @@ endif()
 
 # Perform the rest of the test, verifying that the project files exist.
 
-if(NOT EXISTS "${MY_TEST_WORKING_DIRECTORY}/MyTestGeneratedFiles/Project/New/SuccessCase/MyProjectDir/.meddyproject")
-  message("Failed. Dot meddyproject directory does not exist.")
+if(NOT EXISTS "${MY_TEST_WORKING_DIRECTORY}/MyTestGeneratedFiles/Project/New/SuccessCase/MyProjectDir/_meddyproject")
+  message("Failed. Meddyproject dir does not exist.")
   cmake_language(EXIT 4)
 endif()
 
-if(NOT EXISTS "${MY_TEST_WORKING_DIRECTORY}/MyTestGeneratedFiles/Project/New/SuccessCase/MyProjectDir/.meddyproject/Manifest.json")
+if(NOT EXISTS "${MY_TEST_WORKING_DIRECTORY}/MyTestGeneratedFiles/Project/New/SuccessCase/MyProjectDir/_meddyproject/manifest.json")
   message("Failed. Project manifest file does not exist.")
   cmake_language(EXIT 5)
 endif()
