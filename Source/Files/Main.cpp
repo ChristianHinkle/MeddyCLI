@@ -19,6 +19,8 @@ namespace
 // many hard-coded if statements in this main function.
 // @Christian: TODO: Support both case of the executable path being passed as `argv[0]` as well as it
 // not being passed at all.
+// @Christian: TODO: [todo][techdebt] Eliminate the error-handling code that emits user-facing messages into a
+// separate library that handles SDK interaction and would potentially support localization as well.
 int main(int argc, char** argv)
 {
     std::cout << '\n';
@@ -31,15 +33,17 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    const boost::filesystem::path currentWorkingDirectoryAbsolute = boost::filesystem::current_path();
-    assert(currentWorkingDirectoryAbsolute.is_absolute()); // The `current_path` function returns the path as an absolute.
+    const boost::filesystem::path cwdPathAbsolute = boost::filesystem::current_path();
+    assert(cwdPathAbsolute.is_absolute()); // The `current_path` function returns the path as an absolute.
 
-    const CppUtils::CharBufferString<char, 2048> currentWorkingDirAbsoluteCharBuffer =
+    const CppUtils::CharBufferString<char, 2048> cwdPathAbsoluteCharBuffer =
         MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
-            boost::filesystem::weakly_canonical(currentWorkingDirectoryAbsolute)
+            boost::filesystem::weakly_canonical(cwdPathAbsolute)
         );
 
-    const std::string_view currentWorkingDirectoryString = currentWorkingDirAbsoluteCharBuffer.ToStringView();
+    const std::string_view cwdPathAbsoluteString = cwdPathAbsoluteCharBuffer.ToStringView();
+
+    CppUtils::ExpectedResult cwdMeddyproject = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
 
     const std::string_view arg1st = argv[1];
 
@@ -80,7 +84,7 @@ int main(int argc, char** argv)
             MeddySDK::UncertainProjectCreationResult result =
                 MeddySDK::TryCreateNewProject(std::move(projectRootPath));
 
-            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, currentWorkingDirectoryAbsolute);
+            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, cwdPathAbsolute);
 
             CppUtils::CharBufferString<char, 2048> projectRootPathAbsoluteCharBuffer =
                 MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
@@ -137,13 +141,13 @@ int main(int argc, char** argv)
 
         if (arg2nd == "current")
         {
-            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{currentWorkingDirectoryAbsolute});
+            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
             if (result.IsError())
             {
                 switch (result.GetError())
                 {
                 case MeddySDK::Error_GetOuterMeddyprojectDirPath::PathDoesntExist:
-                    std::cout << "error: \"" << currentWorkingDirectoryString << "\" does not exist." << '\n';
+                    std::cout << "error: \"" << cwdPathAbsoluteString << "\" does not exist." << '\n';
                     std::cout << '\n';
                     std::cout.flush();
                     return 0;
@@ -212,40 +216,64 @@ int main(int argc, char** argv)
             // TODO: Error when extra args are given.
 
             const std::string_view arg3rd = argv[3];
-            boost::filesystem::path sourcePath = arg3rd;
+            boost::filesystem::path sourcePathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, cwdPathAbsolute);
 
-            boost::filesystem::path sourcePathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, currentWorkingDirectoryAbsolute);
+            // Use the cwd as the meddyproject to operate on. If the cwd is no meddyproject, then fall back on using the nearest (child-most) meddyproject of
+            // the source file. This fallback behavior may change. TODO: [todo] Consider preventing this fallback behavior from happening or force the user
+            // to be more explicit in order to avoid unexpected consequences in this occasion of abiguity.
+            std::optional<MeddySDK::Meddyproject> meddyprojectToAddMeddydataTo;
+
+            if (!cwdMeddyproject.IsError())
+            {
+                meddyprojectToAddMeddydataTo = cwdMeddyproject.GetValue();
+            }
+            else
+            {
+                CppUtils::ExpectedResult meddyprojectResult = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{sourcePathAbsolute});
+                if (!meddyprojectResult.IsError())
+                {
+                    meddyprojectToAddMeddydataTo = std::move(meddyprojectResult).GetValue();
+                }
+                else
+                {
+                    switch (meddyprojectResult.GetError())
+                    {
+                    case MeddySDK::Error_GetOuterMeddyprojectDirPath::PathDoesntExist:
+                        std::cout << "error: \"" << sourcePathAbsolute << "\" does not exist." << '\n';
+                        std::cout << '\n';
+                        std::cout.flush();
+                        return 0;
+                    case MeddySDK::Error_GetOuterMeddyprojectDirPath::NoMeddyprojectDirFound:
+                        std::cout << "error: No outer meddyproject found." << '\n';
+                        std::cout << '\n';
+                        std::cout.flush();
+                        return 0;
+                    }
+
+                    std::cout << "error: Command failed for an unknown reason." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                }
+            }
+
+            assert(meddyprojectToAddMeddydataTo.has_value());
+
+            boost::filesystem::path sourcePathRelativeToMeddyproject = sourcePathAbsolute.lexically_relative(meddyprojectToAddMeddydataTo->GetRootPath());
 
             CppUtils::ExpectedResult result =
-                MeddySDK::TryAddMeddydata(boost::filesystem::path{sourcePathAbsolute});
-
-            CppUtils::CharBufferString<char, 2048> sourcePathAbsoluteCharBuffer =
-                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
-                    sourcePathAbsolute
-                );
-
-            std::string_view sourcePathAbsoluteString = sourcePathAbsoluteCharBuffer.ToStringView();
+                MeddySDK::AddMeddydata(*std::move(meddyprojectToAddMeddydataTo), std::move(sourcePathRelativeToMeddyproject));
 
             if (result.IsError())
             {
                 switch (result.GetError())
                 {
-                case MeddySDK::Error_TryAddMeddydata::SourcePathDoesNotExist:
-                    std::cout << "error: \"" << sourcePathAbsoluteString << "\" does not exist." << '\n';
-                    std::cout << '\n';
-                    std::cout.flush();
-                    return 0;
-                case MeddySDK::Error_TryAddMeddydata::CouldntLocateOuterMeddyproject:
-                    std::cout << "error: \"" << sourcePathAbsoluteString << "\" is not located in a meddyproject." << '\n';
-                    std::cout << '\n';
-                    std::cout.flush();
-                    return 0;
-                case MeddySDK::Error_TryAddMeddydata::FilesystemFailedToCreateMeddydata:
+                case MeddySDK::Error_AddMeddydata::FilesystemFailedToCreateMeddydata:
                     std::cout << "error: Filesystem failed to create the corresponding meddydata directory." << '\n';
                     std::cout << '\n';
                     std::cout.flush();
                     return 0;
-                case MeddySDK::Error_TryAddMeddydata::FilesystemFailedToCreateManifestFile:
+                case MeddySDK::Error_AddMeddydata::FilesystemFailedToCreateManifestFile:
                     std::cout << "error: Filesystem failed to create the \"" MEDDYSDK_MEDDYDATA_MANIFEST_FILENAME_STRING_LITERAL "\"." << '\n';
                     std::cout << '\n';
                     std::cout.flush();
