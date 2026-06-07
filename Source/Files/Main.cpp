@@ -8,6 +8,7 @@
 #include <MeddySDK/Meddyproject/FilesystemUtils.h>
 #include <MeddySDK/Meddydata/Utils.h>
 #include <utility>
+#include <optional>
 
 namespace
 {
