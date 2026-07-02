@@ -3,6 +3,8 @@
 find_package(MeddySDK_Meddyproject 0 CONFIG REQUIRED COMPONENTS Static)
 find_package(MeddySDK_Meddydata 0 CONFIG REQUIRED COMPONENTS Static)
 
+find_package(CommandParser 0 CONFIG REQUIRED COMPONENTS Static)
+
 find_package(Boost 0 CONFIG REQUIRED COMPONENTS filesystem)
 
 find_package(CppUtils_StdReimpl CONFIG REQUIRED COMPONENTS Static)

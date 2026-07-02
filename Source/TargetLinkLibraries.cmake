@@ -7,6 +7,7 @@ set(TARGETLINKLIBRARIES_CMAKE_RESULT
   INTERFACE
     $<BUILD_LOCAL_INTERFACE:MeddySDK::Meddyproject::Static>
     $<BUILD_LOCAL_INTERFACE:MeddySDK::Meddydata::Static>
+    $<BUILD_LOCAL_INTERFACE:::CommandParser::Static>
     $<BUILD_LOCAL_INTERFACE:Boost::filesystem>
     $<BUILD_LOCAL_INTERFACE:CppUtils::StdReimpl::Static>
     $<BUILD_LOCAL_INTERFACE:CppUtils::Core::Static>
