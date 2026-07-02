@@ -29,6 +29,6 @@ include("${CMAKE_CURRENT_LIST_DIR}/${MY_BASE_PROJECT_NAME_FULL}Export.cmake")
 # It's important to make sure the names are the same for consistency. Namely, so that build
 # interface users can use `OVERRIDE_FIND_PACKAGE` with `FetchContent_Declare()`.
 #
-
+add_executable(${MY_BASE_PROJECT_NAME_NAMESPACE}::${MY_BASE_PROJECT_NAME_LEAFNAME}::Include ALIAS ${MY_BASE_PROJECT_NAME_FULL}_Include)
 add_executable(${MY_BASE_PROJECT_NAME_NAMESPACE}::${MY_BASE_PROJECT_NAME_LEAFNAME}::Source ALIAS ${MY_BASE_PROJECT_NAME_FULL}_Source)
 add_executable(${MY_BASE_PROJECT_NAME_NAMESPACE}::${MY_BASE_PROJECT_NAME_LEAFNAME}::Executable ALIAS ${MY_BASE_PROJECT_NAME_FULL}_Executable)
