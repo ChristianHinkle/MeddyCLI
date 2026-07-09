@@ -7,7 +7,9 @@ See [MeddySuperproject](https://github.com/ChristianHinkle/MeddySuperproject) fo
 ## Dependencies
 
 MeddyCLI
+- [CommandParser](https://github.com/ChristianHinkle/CommandParserCpp)
 - [MeddySDK_Meddyproject](https://github.com/ChristianHinkle/MeddySDK_Meddyproject)
+- [MeddySDK_Meddydata](https://github.com/ChristianHinkle/MeddySDK_Meddydata)
 - [boost_filesystem](https://github.com/boostorg/filesystem)
 - [CppUtils_Core](https://github.com/ChristianHinkle/CppUtils_Core)
 - [CppUtils_Misc](https://github.com/ChristianHinkle/CppUtils_Misc)
