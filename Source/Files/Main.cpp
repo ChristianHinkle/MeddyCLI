@@ -11,6 +11,7 @@
 #include <optional>
 #include <CommandParser/ParseFunctions.h>
 #include <CommandParser/Utils.h>
+#include <type_traits>
 
 namespace
 {
@@ -37,6 +38,9 @@ constexpr std::size_t MyMaxCommandNodeNameCharLength{32};
 constexpr char MyCommandNodeNameArray[][MyMaxCommandNodeNameCharLength]
 {
     "project",
+    "new",
+    "current",
+    "meddydata",
     "create",
 };
 
@@ -61,25 +65,18 @@ constexpr CommandParser::CommandNodeIndex MyCommandNodeParentArray[]
 {
     CommandParser::InvalidCommandNodeIndex,
     0u,
+    0u,
+    CommandParser::InvalidCommandNodeIndex,
+    3u,
 };
 
-// @Christian: TODO: Dispatch commands in some kind of pipeline system, rather than using
-// many hard-coded if statements in this main function.
-// @Christian: TODO: Support both case of the executable path being passed as `argv[0]` as well as it
-// not being passed at all.
+// Note: As a CLI application, we ignore the first arg, as that is conventionally the program name, but it's not guarenteed to
+// be anyway, and we don't need it anyway.
 // @Christian: TODO: [todo][techdebt] Eliminate the error-handling code that emits user-facing messages into a
 // separate library that handles SDK interaction and would potentially support localization as well.
 int main(int argc, char** argv)
 {
     std::cout << '\n';
-
-    if (argc <= 1)
-    {
-        std::cout << "try: meddy --help" << '\n';
-        std::cout << '\n';
-        std::cout.flush();
-        return 0;
-    }
 
     const boost::filesystem::path cwdPathAbsolute = boost::filesystem::current_path();
     assert(cwdPathAbsolute.is_absolute()); // The `current_path` function returns the path as an absolute.
@@ -93,13 +90,43 @@ int main(int argc, char** argv)
 
     CppUtils::ExpectedResult cwdMeddyproject = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
 
-    const std::string_view arg1st = argv[1];
+    assert(argc >= 0); // Must not be negative, because we are about to convert it to an unsigned size_t.
 
-    if (arg1st == "project")
+    CommandParser::ParsedCommand parsedCommand = CommandParser::ParseCommandIgnoringTheProgramNameTokenIndex(
+        std::span{argv, static_cast<std::size_t>(argc)},
+        std::span{MyCommandNodeNameArray, std::extent_v<decltype(MyCommandNodeNameArray)>},
+        std::span{MyCommandNodeParentArray, std::extent_v<decltype(MyCommandNodeParentArray)>}
+    );
+
+    auto commandNodeFullName = CommandParser::GetFullNameOfCommandNode(parsedCommand.CommandNodeIndex,
+        std::span{MyCommandNodeNameArray, std::extent_v<decltype(MyCommandNodeNameArray)>},
+        std::span{MyCommandNodeParentArray, std::extent_v<decltype(MyCommandNodeParentArray)>}
+    );
+
+    // TODO: [todo] Implement validation that no additional, unrecognized arguments were given.
+    switch (parsedCommand.CommandNodeIndex)
     {
-        if (argc <= 2)
+    case CommandParser::InvalidCommandNodeIndex:
         {
-            std::cout << "meddy: '" << arg1st << "' requires arguments." << '\n';
+            if (parsedCommand.FlagArguments.size() >= 1)
+            {
+                if (parsedCommand.FlagArguments.contains("version"))
+                {
+                    std::cout << "TODO: Get ${PROJECT_VERSION} from CMake-generated header file." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
+                }
+            }
+
+            DumpHelpStdOutput();
+            std::cout << '\n';
+            std::cout.flush();
+            return 0;
+        }
+    case 0:
+        {
+            std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
             std::cout << "  meddy project new <project-root-dir>" << '\n';
@@ -108,31 +135,27 @@ int main(int argc, char** argv)
             std::cout.flush();
             return 0;
         }
-
-        const std::string_view arg2nd = argv[2];
-        if (arg2nd == "new")
+    case 1:
         {
-            if (argc <= 3)
+            if (parsedCommand.PositionalArguments.size() < 1)
             {
-                std::cout << "meddy: '" << arg1st << " " << arg2nd << "' requires arguments." << '\n';
+                std::cout << "meddy: '" << commandNodeFullName << "' requires arguments." << '\n';
                 std::cout << '\n';
-                std::cout << "Possible commands" << '\n';
+                std::cout << "Accepted usage:" << '\n';
                 std::cout << "  meddy project new <project-root-dir>" << '\n';
-                std::cout << "  meddy project current" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
             }
 
-            // TODO: Error when extra args are given.
+            const std::string_view projectRootPathArg = parsedCommand.PositionalArguments[0];
 
-            const std::string_view arg3rd = argv[3];
-            boost::filesystem::path projectRootPath = arg3rd;
+            boost::filesystem::path projectRootPath = projectRootPathArg;
 
             MeddySDK::UncertainProjectCreationResult result =
                 MeddySDK::TryCreateNewProject(std::move(projectRootPath));
 
-            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, cwdPathAbsolute);
+            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{projectRootPathArg}, cwdPathAbsolute);
 
             CppUtils::CharBufferString<char, 2048> projectRootPathAbsoluteCharBuffer =
                 MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
@@ -186,8 +209,7 @@ int main(int argc, char** argv)
 
             return 0;
         }
-
-        if (arg2nd == "current")
+    case 2:
         {
             CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
             if (result.IsError())
@@ -223,22 +245,9 @@ int main(int argc, char** argv)
 
             return 0;
         }
-
-        std::cout << "meddy: '" << arg2nd << "' is not a " << arg1st << " command." << '\n';
-        std::cout << '\n';
-        std::cout << "Possible commands" << '\n';
-        std::cout << "  meddy project new <project-root-dir>" << '\n';
-        std::cout << "  meddy project current" << '\n';
-        std::cout << '\n';
-        std::cout.flush();
-        return 0;
-    }
-
-    if (arg1st == "meddydata")
-    {
-        if (argc <= 2)
+    case 3:
         {
-            std::cout << "meddy: '" << arg1st << "' requires arguments." << '\n';
+            std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
             std::cout << "  meddy meddydata create <source-pathname>" << '\n';
@@ -246,25 +255,21 @@ int main(int argc, char** argv)
             std::cout.flush();
             return 0;
         }
-
-        const std::string_view arg2nd = argv[2];
-        if (arg2nd == "create")
+    case 4:
         {
-            if (argc <= 3)
+            if (parsedCommand.PositionalArguments.size() < 1)
             {
-                std::cout << "meddy: '" << arg1st << " " << arg2nd << "' requires arguments." << '\n';
+                std::cout << "meddy: '" << commandNodeFullName << "' requires arguments." << '\n';
                 std::cout << '\n';
-                std::cout << "Possible commands" << '\n';
+                std::cout << "Accepted usage:" << '\n';
                 std::cout << "  meddy meddydata create <source-pathname>" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
             }
 
-            // TODO: Error when extra args are given.
-
-            const std::string_view arg3rd = argv[3];
-            boost::filesystem::path sourcePathAbsolute = boost::filesystem::absolute(boost::filesystem::path{arg3rd}, cwdPathAbsolute);
+            const std::string_view sourcePathArg = parsedCommand.PositionalArguments[0];
+            boost::filesystem::path sourcePathAbsolute = boost::filesystem::absolute(boost::filesystem::path{sourcePathArg}, cwdPathAbsolute);
 
             // Use the cwd as the meddyproject to operate on. If the cwd is no meddyproject, then fall back on using the nearest (child-most) meddyproject of
             // the source file. This fallback behavior may change. TODO: [todo] Consider preventing this fallback behavior from happening or force the user
@@ -346,37 +351,10 @@ int main(int argc, char** argv)
 
             return 0;
         }
-
-        std::cout << "meddy: '" << arg2nd << "' is not a " << arg1st << " command." << '\n';
-        std::cout << '\n';
-        std::cout << "Possible commands" << '\n';
-        std::cout << "  meddy meddydata create <source-pathname>" << '\n';
-        std::cout << '\n';
-        std::cout.flush();
-        return 0;
+    default:
+        assert(false); // Unimplemented command index.
     }
 
-    if (arg1st == "--help")
-    {
-        // TODO: Error when extra args are given.
-        DumpHelpStdOutput();
-        std::cout << '\n';
-        std::cout.flush();
-        return 0;
-    }
-
-    if (arg1st == "--version")
-    {
-        // TODO: Error when extra args are given.
-        std::cout << "TODO: Get ${PROJECT_VERSION} from CMake-generated header file." << '\n';
-        std::cout << '\n';
-        std::cout.flush();
-        return 0;
-    }
-
-    std::cout << "meddy: '" << arg1st << "' is not a meddy command. See 'meddy --help'." << '\n';
-    std::cout << '\n';
-    std::cout.flush();
     return 0;
 }
 
