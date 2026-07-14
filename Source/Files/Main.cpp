@@ -12,6 +12,7 @@
 #include <CommandParser/ParseFunctions.h>
 #include <CommandParser/Utils.h>
 #include <type_traits>
+#include <CommandParser/FixedCapacityCstringConstant.h>
 
 namespace
 {
@@ -21,21 +22,17 @@ namespace
 
 // Note: [cache] Keeping this number as a power of two is important to keep element access straightforward (via simple offsetting & bit shifting) for the CPU, and to prevent
 // the cstrings from straddling multiple cache lines unnecessarily.
-constexpr std::size_t MyMaxCommandNodeNameCharLength{32};
+constexpr std::size_t MyCommandNodeNameStructSize{32};
 
-// Note: [cache] An array of string views would be nicer obviously, but what we have here is the best for our use case, for a few reasons:
+// Note: [cache] An array of string views would be nice obviously, but what we have here is the best for our use case, for a few reasons:
 // 1. We have all our cstrings stored side-by-side in the same area of static storage, since it is a 2D character array.
-//     - Side note: It's also nice that we have the strings spaced by a consistent alignment of `MyMaxCommandNodeNameLength`, which helps the CPU by making
+//     - Side note: It's also nice that we have the strings spaced by a consistent alignment of `MyCommandNodeNameStructSize`, which helps the CPU by making
 //       predictable for the prefetcher and possibly the branch predictor as well for certain logic.
 // 2. Accessing these cstrings is a simple memory offset. If we instead used string views, then that would be an array of pointers (and lengths), which would
 //    require the CPU to use those pointers to jump to a completely different area of static storage, where the string literal is located.
 // 3. Another negligible benefit is the space we're occupying in memory. A 2D array of characters is storing only the characters themselves, with offsets known at compile
 //    time, whereas an array of `std::string_view`s would be actually storing pointers (and lengths) to the cstring literals, which would be taking up additional space.
-//
-// TODO: [todo] Improvement: Embed a precalculated length of the string into each element. We could change this an array of structs which store the char array and
-// a separate length data member which occupies the space of a char, which means our max string length would be one less character after this change, as that last
-// spot would now be used to store the string length.
-constexpr char MyCommandNodeNameArray[][MyMaxCommandNodeNameCharLength]
+constexpr CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
 {
     "project",
     "new",
@@ -43,23 +40,6 @@ constexpr char MyCommandNodeNameArray[][MyMaxCommandNodeNameCharLength]
     "meddydata",
     "create",
 };
-
-// Note: [cache] Yes this is returning a new pointer (in the form of a string view) to the cstrings rather than using the array directly, but that does not imply a
-// cost of indirection in this case. Because, if we compare these two cases:
-// a) Accessing an element via the array directly: The resulting machine code has the offset to the data baked into the code that's using it.
-// b) Accessing an element via a pointer returned by a function: The pointer is an offset to the data, which is not hardcoded into the machine code, but it is
-//    a pointer stored in a CPU register or even on the stack, which located in a place of hot access and code execution, so we know it's already loaded into
-//    cache at the very least. Also, the compiler will likely inline the implementation of this function, which will result in the offset being baked into the
-//    machine code just like the other case.
-//
-// For an example of where this would be costly: If the pointer to the data was stored somewhere else (not on the stack/registers), then the CPU would first have to load the
-// pointer itself into cache before even being able to use it to access the data.
-constexpr std::string_view GetCommandNodeName(CommandParser::CommandNodeIndex index)
-{
-    // TODO: [todo] If we precalculate the length and store it along with these strings, we could directly use that here to construct our string view to
-    // avoid the strlen calculation (which admittedly is already very fast considering specialized CPU instructions and the fact that these are fairly small string lengths).
-    return MyCommandNodeNameArray[index];
-}
 
 constexpr CommandParser::CommandNodeIndex MyCommandNodeParentArray[]
 {
