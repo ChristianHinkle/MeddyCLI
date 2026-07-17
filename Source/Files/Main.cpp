@@ -14,12 +14,6 @@
 #include <type_traits>
 #include <CommandParser/FixedCapacityCstringConstant.h>
 
-namespace
-{
-    template <bool shouldFlush = true>
-    void DumpHelpStdOutput();
-}
-
 // Note: [cache] Keeping this number as a power of two is important to keep element access straightforward (via simple offsetting & bit shifting) for the CPU, and to prevent
 // the cstrings from straddling multiple cache lines unnecessarily.
 constexpr std::size_t MyCommandNodeNameStructSize{32};
@@ -35,7 +29,7 @@ constexpr std::size_t MyCommandNodeNameStructSize{32};
 constexpr CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
 {
     "project",
-    "new",
+    "create",
     "current",
     "meddydata",
     "create",
@@ -99,7 +93,16 @@ int main(int argc, char** argv)
                 }
             }
 
-            DumpHelpStdOutput();
+            std::cout << "usage: meddy <command> [<args>]" << '\n';
+            std::cout << '\n';
+            std::cout << "Here are the basic meddy commands:" << '\n';
+            std::cout << '\n';
+            std::cout << "Create a project" << '\n';
+            std::cout << "  meddy project create <project-root-dir>" << '\n';
+            std::cout << '\n';
+            std::cout << "Create meddydata" << '\n';
+            std::cout << "  meddy meddydata create <source-pathname>" << '\n';
+
             std::cout << '\n';
             std::cout.flush();
             return 0;
@@ -109,7 +112,7 @@ int main(int argc, char** argv)
             std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
-            std::cout << "  meddy project new <project-root-dir>" << '\n';
+            std::cout << "  meddy project create <project-root-dir>" << '\n';
             std::cout << "  meddy project current" << '\n';
             std::cout << '\n';
             std::cout.flush();
@@ -122,7 +125,7 @@ int main(int argc, char** argv)
                 std::cout << "meddy: '" << commandNodeFullName << "' requires arguments." << '\n';
                 std::cout << '\n';
                 std::cout << "Accepted usage:" << '\n';
-                std::cout << "  meddy project new <project-root-dir>" << '\n';
+                std::cout << "  meddy project create <project-root-dir>" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
@@ -336,26 +339,4 @@ int main(int argc, char** argv)
     }
 
     return 0;
-}
-
-namespace
-{
-    template <bool shouldFlush>
-    void DumpHelpStdOutput()
-    {
-        std::cout << "usage: meddy <command> [<args>]" << '\n';
-        std::cout << '\n';
-        std::cout << "Here are the basic meddy commands:" << '\n';
-        std::cout << '\n';
-        std::cout << "Create a project" << '\n';
-        std::cout << "  meddy project new <project-root-dir>" << '\n';
-        std::cout << '\n';
-        std::cout << "Create meddydata" << '\n';
-        std::cout << "  meddy meddydata create <source-pathname>" << '\n';
-
-        if constexpr (shouldFlush)
-        {
-            std::cout.flush();
-        }
-    }
 }
