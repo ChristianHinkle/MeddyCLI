@@ -9,24 +9,15 @@
 #include <MeddySDK/Meddydata/Utils.h>
 #include <utility>
 #include <optional>
-#include <CommandParser/ParseFunctions.h>
+#include <CommandParser.h>
 #include <CommandParser/Utils.h>
 #include <type_traits>
 #include <CommandParser/FixedCapacityCstringConstant.h>
+#include <algorithm>
 
-// Note: [cache] Keeping this number as a power of two is important to keep element access straightforward (via simple offsetting & bit shifting) for the CPU, and to prevent
-// the cstrings from straddling multiple cache lines unnecessarily.
 constexpr std::size_t MyCommandNodeNameStructSize{32};
 
-// Note: [cache] An array of string views would be nice obviously, but what we have here is the best for our use case, for a few reasons:
-// 1. We have all our cstrings stored side-by-side in the same area of static storage, since it is a 2D character array.
-//     - Side note: It's also nice that we have the strings spaced by a consistent alignment of `MyCommandNodeNameStructSize`, which helps the CPU by making
-//       predictable for the prefetcher and possibly the branch predictor as well for certain logic.
-// 2. Accessing these cstrings is a simple memory offset. If we instead used string views, then that would be an array of pointers (and lengths), which would
-//    require the CPU to use those pointers to jump to a completely different area of static storage, where the string literal is located.
-// 3. Another negligible benefit is the space we're occupying in memory. A 2D array of characters is storing only the characters themselves, with offsets known at compile
-//    time, whereas an array of `std::string_view`s would be actually storing pointers (and lengths) to the cstring literals, which would be taking up additional space.
-constexpr CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
+constexpr alignas(std::min(MyCommandNodeNameStructSize, std::size_t{64u})) CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
 {
     "project",
     "create",
