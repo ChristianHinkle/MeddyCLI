@@ -295,6 +295,11 @@ int main(int argc, char** argv)
             {
                 switch (result.GetError())
                 {
+                case MeddySDK::Error_AddMeddydata::SourceFilePathContainsReservedMeddydataDirName:
+                    std::cout << "error: Source file path contains reserved name \"" << MEDDYSDK_MEDDYDATA_DIR_STRING_LITERAL "\"." << '\n';
+                    std::cout << '\n';
+                    std::cout.flush();
+                    return 0;
                 case MeddySDK::Error_AddMeddydata::FilesystemFailedToCreateMeddydata:
                     std::cout << "error: Filesystem failed to create the corresponding meddydata directory." << '\n';
                     std::cout << '\n';
