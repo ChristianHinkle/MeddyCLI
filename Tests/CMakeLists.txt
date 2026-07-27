@@ -23,10 +23,10 @@ project(${MY_BASE_PROJECT_NAME_FULL}_Tests
 # configuration process.
 
 add_test(
-  NAME MeddyCLI.Project.New.SuccessCase
+  NAME MeddyCLI.Project.Create.SuccessCase
   COMMAND ${CMAKE_COMMAND}
     "-DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}"
     "-DMY_MEDDY_EXECUTABLE_PATH=$<TARGET_FILE:${MY_BASE_PROJECT_NAME_NAMESPACE}::${MY_BASE_PROJECT_NAME_LEAFNAME}::Executable>"
     "-DMY_TEST_WORKING_DIRECTORY=${CMAKE_CURRENT_BINARY_DIR}"
-    -P "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Scripts/Project_New_SuccessCase.cmake"
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/CMake/Scripts/Project_Create_SuccessCase.cmake"
   )
