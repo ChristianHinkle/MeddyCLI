@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     assert(cwdPathAbsolute.is_absolute()); // The `current_path` function returns the path as an absolute.
 
     const CppUtils::CharBufferString<char, 2048> cwdPathAbsoluteCharBuffer =
-        MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+        MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
             boost::filesystem::weakly_canonical(cwdPathAbsolute)
         );
 
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
             boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{projectRootPathArg}, cwdPathAbsolute);
 
             CppUtils::CharBufferString<char, 2048> projectRootPathAbsoluteCharBuffer =
-                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+                MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
                     projectRootPathAbsolute
                 );
 
@@ -239,7 +239,7 @@ int main(int argc, char** argv)
             }
 
             CppUtils::CharBufferString<char, 2048> resultPathString =
-                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+                MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
                     boost::filesystem::weakly_canonical(std::move(result).GetValue().GetMeddyprojectDirPath())
                 );
 
@@ -350,7 +350,7 @@ int main(int argc, char** argv)
             }
 
             CppUtils::CharBufferString<char, 2048> resultMeddydataPathString =
-                MeddySDK::ConstructPrettyPathCharacterBuffer<2048, char>(
+                MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
                     boost::filesystem::weakly_canonical(result.GetValue().GetMeddydataPath())
                 );
 
