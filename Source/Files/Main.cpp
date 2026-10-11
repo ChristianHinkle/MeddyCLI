@@ -15,28 +15,43 @@
 #include <CommandParser/FixedCapacityCstringConstant.h>
 #include <algorithm>
 
-constexpr std::size_t MyCommandNodeNameStructSize{32};
+// Command Synopsis Notes:
+// Note: We use the command name "meta" to refer to "meddydata". This eliminates the repetitive appearance of the name "meddy" in "meddy meddydata" and
+// is wayy easier to type. Comes at the cost of being slightly ambiguous about what type of metadata we are talking about (i.e, meddydata?, filesystem metadata?, embedded metadata?), but I
+// think this is reasonably obvious. If we ever create new features built around other types of metadata, we can explictly specify for those. So the philosophy is: by default, we
+// are refering to MEDDYdata whenever the term metadata is mentioned in the context of meddy.
 
+namespace MeddyCommandIndex
+{
+    constexpr auto NONE = CommandParser::InvalidCommandNodeIndex;
+
+    enum : CommandParser::CommandNodeIndex
+    {
+        project,
+        project_init,
+        project_current,
+        meta,
+        meta_init,
+    };
+};
+
+constexpr CommandParser::CommandNodeIndex MyCommandNodeParentArray[]
+{
+    MeddyCommandIndex::NONE,
+    MeddyCommandIndex::project,
+    MeddyCommandIndex::project,
+    MeddyCommandIndex::NONE,
+    MeddyCommandIndex::meta,
+};
+
+constexpr std::size_t MyCommandNodeNameStructSize{32};
 constexpr alignas(std::min(MyCommandNodeNameStructSize, std::size_t{64u})) CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
 {
     "project",
     "init",
     "current",
-    // We use the command name "meta" to refer to "meddydata". This eliminates the repetitive appearance of the name "meddy" in "meddy meddydata" and
-    // is wayy easier to type. Comes at the cost of being slightly ambiguous about what type of metadata we are talking about (i.e, meddydata?, filesystem metadata?, embedded metadata?), but I
-    // think this is reasonably obvious. If we ever create new features built around other types of metadata, we can explictly specify for those. So the philosophy is: by default, we
-    // are refering to MEDDYdata whenever the term metadata is mentioned in the context of meddy.
     "meta",
     "init",
-};
-
-constexpr CommandParser::CommandNodeIndex MyCommandNodeParentArray[]
-{
-    CommandParser::InvalidCommandNodeIndex,
-    0u,
-    0u,
-    CommandParser::InvalidCommandNodeIndex,
-    3u,
 };
 
 // Note: As a CLI application, we ignore the first arg, as that is conventionally the program name, but it's not guarenteed to
@@ -75,7 +90,7 @@ int main(int argc, char** argv)
     // TODO: [todo] Implement validation that no additional, unrecognized arguments were given.
     switch (parsedCommand.CommandNodeIndex)
     {
-    case CommandParser::InvalidCommandNodeIndex:
+    case MeddyCommandIndex::NONE:
         {
             if (parsedCommand.FlagArguments.size() >= 1)
             {
@@ -102,7 +117,7 @@ int main(int argc, char** argv)
             std::cout.flush();
             return 0;
         }
-    case 0:
+    case MeddyCommandIndex::project:
         {
             std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
@@ -113,7 +128,7 @@ int main(int argc, char** argv)
             std::cout.flush();
             return 0;
         }
-    case 1:
+    case MeddyCommandIndex::project_init:
         {
             if (parsedCommand.PositionalArguments.size() < 1)
             {
@@ -187,7 +202,7 @@ int main(int argc, char** argv)
 
             return 0;
         }
-    case 2:
+    case MeddyCommandIndex::project_current:
         {
             CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
             if (result.IsError())
@@ -223,7 +238,7 @@ int main(int argc, char** argv)
 
             return 0;
         }
-    case 3:
+    case MeddyCommandIndex::meta:
         {
             std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
@@ -233,7 +248,7 @@ int main(int argc, char** argv)
             std::cout.flush();
             return 0;
         }
-    case 4:
+    case MeddyCommandIndex::meta_init:
         {
             if (parsedCommand.PositionalArguments.size() < 1)
             {
