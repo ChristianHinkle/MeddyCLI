@@ -20,10 +20,10 @@ constexpr std::size_t MyCommandNodeNameStructSize{32};
 constexpr alignas(std::min(MyCommandNodeNameStructSize, std::size_t{64u})) CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
 {
     "project",
-    "create",
+    "init",
     "current",
     "meddydata",
-    "create",
+    "init",
 };
 
 constexpr CommandParser::CommandNodeIndex MyCommandNodeParentArray[]
@@ -89,10 +89,10 @@ int main(int argc, char** argv)
             std::cout << "Here are the basic meddy commands:" << '\n';
             std::cout << '\n';
             std::cout << "Create a project" << '\n';
-            std::cout << "  meddy project create <project-root-dir>" << '\n';
+            std::cout << "  meddy project init <project-root-dir>" << '\n';
             std::cout << '\n';
             std::cout << "Create meddydata" << '\n';
-            std::cout << "  meddy meddydata create <source-pathname>" << '\n';
+            std::cout << "  meddy meddydata init <source-pathname>" << '\n';
 
             std::cout << '\n';
             std::cout.flush();
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
             std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
-            std::cout << "  meddy project create <project-root-dir>" << '\n';
+            std::cout << "  meddy project init <project-root-dir>" << '\n';
             std::cout << "  meddy project current" << '\n';
             std::cout << '\n';
             std::cout.flush();
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
                 std::cout << "meddy: '" << commandNodeFullName << "' requires arguments." << '\n';
                 std::cout << '\n';
                 std::cout << "Accepted usage:" << '\n';
-                std::cout << "  meddy project create <project-root-dir>" << '\n';
+                std::cout << "  meddy project init <project-root-dir>" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
@@ -224,7 +224,7 @@ int main(int argc, char** argv)
             std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
-            std::cout << "  meddy meddydata create <source-pathname>" << '\n';
+            std::cout << "  meddy meddydata init <source-pathname>" << '\n';
             std::cout << '\n';
             std::cout.flush();
             return 0;
@@ -236,7 +236,7 @@ int main(int argc, char** argv)
                 std::cout << "meddy: '" << commandNodeFullName << "' requires arguments." << '\n';
                 std::cout << '\n';
                 std::cout << "Accepted usage:" << '\n';
-                std::cout << "  meddy meddydata create <source-pathname>" << '\n';
+                std::cout << "  meddy meddydata init <source-pathname>" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
