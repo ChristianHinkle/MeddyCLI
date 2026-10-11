@@ -22,7 +22,11 @@ constexpr alignas(std::min(MyCommandNodeNameStructSize, std::size_t{64u})) Comma
     "project",
     "init",
     "current",
-    "meddydata",
+    // We use the command name "meta" to refer to "meddydata". This eliminates the repetitive appearance of the name "meddy" in "meddy meddydata" and
+    // is wayy easier to type. Comes at the cost of being slightly ambiguous about what type of metadata we are talking about (i.e, meddydata?, filesystem metadata?, embedded metadata?), but I
+    // think this is reasonably obvious. If we ever create new features built around other types of metadata, we can explictly specify for those. So the philosophy is: by default, we
+    // are refering to MEDDYdata whenever the term metadata is mentioned in the context of meddy.
+    "meta",
     "init",
 };
 
@@ -92,7 +96,7 @@ int main(int argc, char** argv)
             std::cout << "  meddy project init <project-root-dir>" << '\n';
             std::cout << '\n';
             std::cout << "Create meddydata" << '\n';
-            std::cout << "  meddy meddydata init <source-pathname>" << '\n';
+            std::cout << "  meddy meta init <source-pathname>" << '\n';
 
             std::cout << '\n';
             std::cout.flush();
@@ -224,7 +228,7 @@ int main(int argc, char** argv)
             std::cout << "meddy: '" << commandNodeFullName << "' is not a fully specified command name." << '\n';
             std::cout << '\n';
             std::cout << "Possible commands" << '\n';
-            std::cout << "  meddy meddydata init <source-pathname>" << '\n';
+            std::cout << "  meddy meta init <source-pathname>" << '\n';
             std::cout << '\n';
             std::cout.flush();
             return 0;
@@ -236,7 +240,7 @@ int main(int argc, char** argv)
                 std::cout << "meddy: '" << commandNodeFullName << "' requires arguments." << '\n';
                 std::cout << '\n';
                 std::cout << "Accepted usage:" << '\n';
-                std::cout << "  meddy meddydata init <source-pathname>" << '\n';
+                std::cout << "  meddy meta init <source-pathname>" << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;
