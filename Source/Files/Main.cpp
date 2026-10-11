@@ -14,6 +14,7 @@
 #include <type_traits>
 #include <CommandParser/FixedCapacityCstringConstant.h>
 #include <algorithm>
+#include <array>
 
 // Command Synopsis Notes:
 // Note: We use the command name "meta" to refer to "meddydata". This eliminates the repetitive appearance of the name "meddy" in "meddy meddydata" and
@@ -21,38 +22,48 @@
 // think this is reasonably obvious. If we ever create new features built around other types of metadata, we can explictly specify for those. So the philosophy is: by default, we
 // are refering to MEDDYdata whenever the term metadata is mentioned in the context of meddy.
 
+// Each command node is defined by macro arguments in the format: (IndexName, ParentIndexName, LeafNameStringLiteral).
+#define FOREACH_COMMAND(op) \
+    op(project, NONE, "project") \
+    op(project_init, project, "init") \
+    op(project_current, project, "current") \
+    op(meta, NONE, "meta") \
+    op(meta_init, meta, "init")
+
+#define COMMAND_INDEX_NAME_WITH_COMMA(IndexName, ParentIndexName, LeafNameStringLiteral) IndexName,
+#define COMMAND_PARENT_INDEX_VALUE_WITH_COMMA(IndexName, ParentIndexName, LeafNameStringLiteral) MeddyCommandIndex::ParentIndexName,
+#define COMMAND_STRING_LITERAL_WITH_COMMA(IndexName, ParentIndexName, LeafNameStringLiteral) LeafNameStringLiteral,
+
 namespace MeddyCommandIndex
 {
     constexpr auto NONE = CommandParser::InvalidCommandNodeIndex;
 
     enum : CommandParser::CommandNodeIndex
     {
-        project,
-        project_init,
-        project_current,
-        meta,
-        meta_init,
+        FOREACH_COMMAND(COMMAND_INDEX_NAME_WITH_COMMA)
+        COUNT
     };
 };
 
 constexpr CommandParser::CommandNodeIndex MyCommandNodeParentArray[]
 {
-    MeddyCommandIndex::NONE,
-    MeddyCommandIndex::project,
-    MeddyCommandIndex::project,
-    MeddyCommandIndex::NONE,
-    MeddyCommandIndex::meta,
+    FOREACH_COMMAND(COMMAND_PARENT_INDEX_VALUE_WITH_COMMA)
 };
 
 constexpr std::size_t MyCommandNodeNameStructSize{32};
 constexpr alignas(std::min(MyCommandNodeNameStructSize, std::size_t{64u})) CommandParser::FixedCapacityCstringConstant<MyCommandNodeNameStructSize> MyCommandNodeNameArray[]
 {
-    "project",
-    "init",
-    "current",
-    "meta",
-    "init",
+    FOREACH_COMMAND(COMMAND_STRING_LITERAL_WITH_COMMA)
 };
+
+static_assert(std::size(MyCommandNodeParentArray) == MeddyCommandIndex::COUNT, "Mismatch detected in generated command node arrays!");
+static_assert(std::size(MyCommandNodeNameArray) == MeddyCommandIndex::COUNT, "Mismatch detected in generated command node arrays!");
+
+// Undef these macros as they are no longer needed.
+#undef FOREACH_COMMAND
+#undef COMMAND_INDEX_NAME_WITH_COMMA
+#undef COMMAND_PARENT_INDEX_VALUE_WITH_COMMA
+#undef COMMAND_STRING_LITERAL_WITH_COMMA
 
 // Note: As a CLI application, we ignore the first arg, as that is conventionally the program name, but it's not guarenteed to
 // be anyway, and we don't need it anyway.
