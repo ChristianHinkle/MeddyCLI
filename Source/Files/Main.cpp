@@ -2,8 +2,7 @@
 
 #include <iostream>
 #include <string_view>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <MeddySDK/Meddyproject/Utils.h>
 #include <MeddySDK/Meddyproject/FilesystemUtils.h>
 #include <MeddySDK/Meddydata/Utils.h>
@@ -15,6 +14,7 @@
 #include <CommandParser/FixedCapacityCstringConstant.h>
 #include <algorithm>
 #include <array>
+#include <CppUtils/Core/Filesystem.h>
 
 // Command Synopsis Notes:
 // Note: We use the command name "meta" to refer to "meddydata". This eliminates the repetitive appearance of the name "meddy" in "meddy meddydata" and
@@ -73,17 +73,17 @@ int main(int argc, char** argv)
 {
     std::cout << '\n';
 
-    const boost::filesystem::path cwdPathAbsolute = boost::filesystem::current_path();
+    const std::filesystem::path cwdPathAbsolute = std::filesystem::current_path();
     assert(cwdPathAbsolute.is_absolute()); // The `current_path` function returns the path as an absolute.
 
     const CppUtils::CharBufferString<char, 2048> cwdPathAbsoluteCharBuffer =
         MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
-            boost::filesystem::weakly_canonical(cwdPathAbsolute)
+            std::filesystem::weakly_canonical(cwdPathAbsolute)
         );
 
     const std::string_view cwdPathAbsoluteString = cwdPathAbsoluteCharBuffer.ToStringView();
 
-    CppUtils::ExpectedResult cwdMeddyproject = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
+    CppUtils::ExpectedResult cwdMeddyproject = MeddySDK::GetOuterMeddyproject(std::filesystem::path{cwdPathAbsolute});
 
     assert(argc >= 0); // Must not be negative, because we are about to convert it to an unsigned size_t.
 
@@ -154,12 +154,21 @@ int main(int argc, char** argv)
 
             const std::string_view projectRootPathArg = parsedCommand.PositionalArguments[0];
 
-            boost::filesystem::path projectRootPath = projectRootPathArg;
+            std::filesystem::path projectRootPath = projectRootPathArg;
 
             MeddySDK::UncertainProjectCreationResult result =
                 MeddySDK::TryCreateNewProject(std::move(projectRootPath));
 
-            boost::filesystem::path projectRootPathAbsolute = boost::filesystem::absolute(boost::filesystem::path{projectRootPathArg}, cwdPathAbsolute);
+            // TODO: [todo][techdebt] Support absolute paths as argument here as well.
+            CppUtils::ExpectedResult projectRootPathAbsoluteResult = CppUtils::MakeAbsoluteUsingBase(projectRootPathArg, cwdPathAbsolute);
+            if (projectRootPathAbsoluteResult.IsError())
+            {
+                // TODO: [todo][techdebt] Handle elegantly.
+                assert(false);
+                std::abort();
+            }
+
+            std::filesystem::path projectRootPathAbsolute = std::move(projectRootPathAbsoluteResult).GetValue();
 
             CppUtils::CharBufferString<char, 2048> projectRootPathAbsoluteCharBuffer =
                 MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
@@ -215,7 +224,7 @@ int main(int argc, char** argv)
         }
     case MeddyCommandIndex::project_current:
         {
-            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{cwdPathAbsolute});
+            CppUtils::ExpectedResult result = MeddySDK::GetOuterMeddyproject(std::filesystem::path{cwdPathAbsolute});
             if (result.IsError())
             {
                 switch (result.GetError())
@@ -240,7 +249,7 @@ int main(int argc, char** argv)
 
             CppUtils::CharBufferString<char, 2048> resultPathString =
                 MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
-                    boost::filesystem::weakly_canonical(std::move(result).GetValue().GetMeddyprojectDirPath())
+                    std::filesystem::weakly_canonical(std::move(result).GetValue().GetMeddyprojectDirPath())
                 );
 
             std::cout << resultPathString.ToStringView() << '\n';
@@ -273,7 +282,17 @@ int main(int argc, char** argv)
             }
 
             const std::string_view sourcePathArg = parsedCommand.PositionalArguments[0];
-            boost::filesystem::path sourcePathAbsolute = boost::filesystem::absolute(boost::filesystem::path{sourcePathArg}, cwdPathAbsolute);
+
+            // TODO: [todo][techdebt] Support absolute paths as argument here as well.
+            CppUtils::ExpectedResult sourcePathAbsoluteResult = CppUtils::MakeAbsoluteUsingBase(sourcePathArg, cwdPathAbsolute);
+            if (sourcePathAbsoluteResult.IsError())
+            {
+                // TODO: [todo][techdebt] Handle elegantly.
+                assert(false);
+                std::abort();
+            }
+
+            std::filesystem::path sourcePathAbsolute = std::move(sourcePathAbsoluteResult).GetValue();
 
             // Use the cwd as the meddyproject to operate on. If the cwd is no meddyproject, then fall back on using the nearest (child-most) meddyproject of
             // the source file. This fallback behavior may change. TODO: [todo] Consider preventing this fallback behavior from happening or force the user
@@ -286,7 +305,7 @@ int main(int argc, char** argv)
             }
             else
             {
-                CppUtils::ExpectedResult meddyprojectResult = MeddySDK::GetOuterMeddyproject(boost::filesystem::path{sourcePathAbsolute});
+                CppUtils::ExpectedResult meddyprojectResult = MeddySDK::GetOuterMeddyproject(std::filesystem::path{sourcePathAbsolute});
                 if (!meddyprojectResult.IsError())
                 {
                     meddyprojectToAddMeddydataTo = std::move(meddyprojectResult).GetValue();
@@ -316,7 +335,7 @@ int main(int argc, char** argv)
 
             assert(meddyprojectToAddMeddydataTo.has_value());
 
-            boost::filesystem::path sourcePathRelativeToMeddyproject = sourcePathAbsolute.lexically_relative(meddyprojectToAddMeddydataTo->GetRootPath());
+            std::filesystem::path sourcePathRelativeToMeddyproject = sourcePathAbsolute.lexically_relative(meddyprojectToAddMeddydataTo->GetRootPath());
 
             CppUtils::ExpectedResult result =
                 MeddySDK::AddMeddydata(*std::move(meddyprojectToAddMeddydataTo), std::move(sourcePathRelativeToMeddyproject));
@@ -351,7 +370,7 @@ int main(int argc, char** argv)
 
             CppUtils::CharBufferString<char, 2048> resultMeddydataPathString =
                 MeddySDK::ConstructGenericPathCharacterBuffer<2048, char>(
-                    boost::filesystem::weakly_canonical(result.GetValue().GetMeddydataPath())
+                    std::filesystem::weakly_canonical(result.GetValue().GetMeddydataPath())
                 );
 
             std::cout << "Successfully created meddydata at: " << resultMeddydataPathString.ToStringView() << '\n';

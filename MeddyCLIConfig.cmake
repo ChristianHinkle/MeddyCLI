@@ -13,8 +13,6 @@ find_dependency(MeddySDK_Meddydata CONFIG COMPONENTS Static)
 
 find_dependency(CommandParser CONFIG COMPONENTS Static)
 
-find_dependency(Boost CONFIG COMPONENTS filesystem)
-
 find_dependency(CppUtils_StdReimpl CONFIG COMPONENTS Static)
 find_dependency(CppUtils_Core CONFIG COMPONENTS Static)
 find_dependency(CppUtils_Misc CONFIG COMPONENTS Static)
