@@ -2,6 +2,7 @@
 
 find_package(MeddySDK_Meddyproject 0 CONFIG REQUIRED COMPONENTS Static)
 find_package(MeddySDK_Meddydata 0 CONFIG REQUIRED COMPONENTS Static)
+find_package(MeddySDK_DAM 0 CONFIG REQUIRED COMPONENTS Static)
 
 find_package(CommandParser 0 CONFIG REQUIRED COMPONENTS Static)
 

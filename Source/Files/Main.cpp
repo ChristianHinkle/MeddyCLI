@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <array>
 #include <CppUtils/Core/Filesystem.h>
+#include <MeddySDK/DAM/Utils.h>
 
 // Command Synopsis Notes:
 // Note: We use the command name "meta" to refer to "meddydata". This eliminates the repetitive appearance of the name "meddy" in "meddy meddydata" and
@@ -363,6 +364,26 @@ int main(int argc, char** argv)
 
                 // Hits if there is an error returned that we don't have a case for in here.
                 std::cout << "error: Command failed for an unknown reason." << '\n';
+                std::cout << '\n';
+                std::cout.flush();
+                return 0;
+            }
+
+            // TODO: [todo][plugins] Avoid directly calling on the DAM library here. Instead, we could have a plugin system and the MeddySDK_DAM library could be
+            // a module library which gets callbacks invoked by dynamic library symbol export name. A plugin system like this implies many decisions to make
+            // and many problems to solve though. E.g., should "plugins" be distributable as binaries and it should just plug-and-play work like that? With C++ that
+            // would be tricky because of the not-stable ABI across different compilers. So third-party "Meddy plugin" developers would be forced to use the same
+            // build toolchain as the original Meddy distributables. Maybe we don't care so much about plugins being user friendly though. I mean, they are
+            // just C++ code that you would have to trust in the first place. Even if plugins used a scripting language, we would have to sandbox things and really
+            // make sure it's locked down, and I don't want to attempt to do that. So maybe a plugin system can be useful only for simple cases like officially
+            // developed optional Meddy plugins. It could also be useful for developers who want to extend off of Meddy to use it for their own software. E.g., if
+            // you're writing a game engine and need to make an asset system which stores metadata about each asset, you could build that off of Meddy and write
+            // a Meddy plugin to help accomplish that. Also, the idea of a plugin system pretty much implies that you are going to write a package manager with versioning
+            // and dependencies, and that just sounds like a lot. Idk if we want to sign up for all of that.
+            const bool successfullyAppendedDcmi = MeddySDK::AppendDcmiMetadataJson(result.GetValue());
+            if (!successfullyAppendedDcmi)
+            {
+                std::cout << "error: Failed to write DCMI data to \"" MEDDYSDK_MEDDYDATA_MANIFEST_FILENAME_STRING_LITERAL "\"." << '\n';
                 std::cout << '\n';
                 std::cout.flush();
                 return 0;

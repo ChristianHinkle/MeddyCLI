@@ -10,6 +10,7 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(MeddySDK_Meddyproject CONFIG COMPONENTS Static)
 find_dependency(MeddySDK_Meddydata CONFIG COMPONENTS Static)
+find_dependency(MeddySDK_DAM CONFIG COMPONENTS Static)
 
 find_dependency(CommandParser CONFIG COMPONENTS Static)
 
